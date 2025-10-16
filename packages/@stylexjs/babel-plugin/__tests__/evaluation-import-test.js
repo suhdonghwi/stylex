@@ -8,14 +8,14 @@
 'use strict';
 
 jest.autoMockOff();
-jest.mock('@dual-bundle/import-meta-resolve');
+jest.mock('oxc-resolver');
 
 /* eslint-disable quotes */
 const { transformSync } = require('@babel/core');
 const stylexPlugin = require('../src/index');
 const jsx = require('@babel/plugin-syntax-jsx');
 const { utils } = require('../src/shared');
-const { moduleResolve } = require('@dual-bundle/import-meta-resolve');
+const resolve = require('oxc-resolver');
 
 const hash = utils.hash;
 
@@ -405,15 +405,15 @@ describe('Evaluation of imported values works based on configuration', () => {
 
   describe('Module resolution commonJS', () => {
     afterEach(() => {
-      moduleResolve.mockReset();
+      resolve.sync.mockReset();
     });
 
     test('Recognizes .ts stylex imports when resolving .js relative imports', () => {
-      moduleResolve.mockImplementation((value) => {
-        if (!value.endsWith('/otherFile.stylex.ts')) {
-          throw new Error('File not found');
+      resolve.sync.mockImplementation((source, specifier) => {
+        if (!specifier.endsWith('/otherFile.stylex.ts')) {
+          return { error: 'File not found' };
         }
-        return new URL('file:///project/otherFile.stylex.ts');
+        return { path: '/project/otherFile.stylex.ts' };
       });
 
       const transformation = transform(
