@@ -19,9 +19,8 @@ import * as t from '@babel/types';
 import { name } from '@stylexjs/stylex/package.json';
 import path from 'path';
 import fs from 'fs';
-import url from 'url';
 import * as z from './validate';
-import { moduleResolve } from '@dual-bundle/import-meta-resolve';
+import resolve from 'oxc-resolver';
 import {
   addDefaultImport,
   addNamedImport,
@@ -699,27 +698,25 @@ export const filePathResolver = (
   sourceFilePath: string,
   aliases: StyleXStateOptions['aliases'],
 ): ?string => {
+  const sourceDirectoryPath = path.dirname(sourceFilePath);
+
   for (const importPathStr of getPossibleFilePaths(relativeFilePath)) {
     // Try to resolve relative paths as is
     if (importPathStr.startsWith('.')) {
-      try {
-        return url.fileURLToPath(
-          moduleResolve(importPathStr, url.pathToFileURL(sourceFilePath)),
-        );
-      } catch {
-        continue;
+      const resolution = resolve.sync(sourceDirectoryPath, importPathStr);
+
+      if ('path' in resolution) {
+        return resolution.path;
       }
     }
 
     // Otherwise, try to resolve the path with aliases
     const allAliases = possibleAliasedPaths(importPathStr, aliases);
     for (const possiblePath of allAliases) {
-      try {
-        return url.fileURLToPath(
-          moduleResolve(possiblePath, url.pathToFileURL(sourceFilePath)),
-        );
-      } catch {
-        continue;
+      const resolution = resolve.sync(sourceDirectoryPath, possiblePath);
+
+      if ('path' in resolution) {
+        return resolution.path;
       }
     }
   }

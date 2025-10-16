@@ -44,7 +44,7 @@ const config = {
     ? external
     : [
         ...external,
-        '@dual-bundle/import-meta-resolve',
+        'oxc-resolver',
         '@stylexjs/stylex',
       ],
   plugins: [
