@@ -705,7 +705,7 @@ export const filePathResolver = (
     if (importPathStr.startsWith('.')) {
       const resolution = resolve.sync(sourceDirectoryPath, importPathStr);
 
-      if ('path' in resolution) {
+      if (resolution.path != null) {
         return resolution.path;
       }
     }
@@ -715,7 +715,7 @@ export const filePathResolver = (
     for (const possiblePath of allAliases) {
       const resolution = resolve.sync(sourceDirectoryPath, possiblePath);
 
-      if ('path' in resolution) {
+      if (resolution.path != null) {
         return resolution.path;
       }
     }
