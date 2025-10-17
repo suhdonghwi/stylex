@@ -20,7 +20,7 @@ import { name } from '@stylexjs/stylex/package.json';
 import path from 'path';
 import fs from 'fs';
 import * as z from './validate';
-import { ResolverFactory } from 'oxc-resolver';
+import { resolver } from './resolver';
 import {
   addDefaultImport,
   addNamedImport,
@@ -691,10 +691,6 @@ const getPossibleFilePaths = (filePath: string) => {
   return [filePath, ...EXTENSIONS.map((ext) => filePathNoCodeExtension + ext)];
 };
 
-const resolve = new ResolverFactory({
-  conditionNames: ['node', 'import'],
-});
-
 // a function that resolves the absolute path of a file when given the
 // relative path of the file from the source file
 export const filePathResolver = (
@@ -707,7 +703,7 @@ export const filePathResolver = (
   for (const importPathStr of getPossibleFilePaths(relativeFilePath)) {
     // Try to resolve relative paths as is
     if (importPathStr.startsWith('.')) {
-      const resolution = resolve.sync(sourceDirectoryPath, importPathStr);
+      const resolution = resolver.sync(sourceDirectoryPath, importPathStr);
 
       if (resolution.path != null) {
         return resolution.path;
@@ -717,7 +713,7 @@ export const filePathResolver = (
     // Otherwise, try to resolve the path with aliases
     const allAliases = possibleAliasedPaths(importPathStr, aliases);
     for (const possiblePath of allAliases) {
-      const resolution = resolve.sync(sourceDirectoryPath, possiblePath);
+      const resolution = resolver.sync(sourceDirectoryPath, possiblePath);
 
       if (resolution.path != null) {
         return resolution.path;

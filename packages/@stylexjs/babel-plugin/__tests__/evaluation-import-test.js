@@ -13,9 +13,9 @@ jest.mock('oxc-resolver');
 /* eslint-disable quotes */
 const { transformSync } = require('@babel/core');
 const stylexPlugin = require('../src/index');
+const { resolver } = require('../src/utils/resolver');
 const jsx = require('@babel/plugin-syntax-jsx');
 const { utils } = require('../src/shared');
-const resolve = require('oxc-resolver');
 
 const hash = utils.hash;
 
@@ -405,11 +405,11 @@ describe('Evaluation of imported values works based on configuration', () => {
 
   describe('Module resolution commonJS', () => {
     afterEach(() => {
-      resolve.sync.mockReset();
+      resolver.sync.mockReset();
     });
 
     test('Recognizes .ts stylex imports when resolving .js relative imports', () => {
-      resolve.sync.mockImplementation((source, specifier) => {
+      resolver.sync.mockImplementation((_, specifier) => {
         if (!specifier.endsWith('/otherFile.stylex.ts')) {
           return { error: 'File not found' };
         }
